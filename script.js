@@ -39,6 +39,9 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeEventListeners();
     setCurrentDate();
     initializeTheme();
+    initializeVisitCounter();
+    initializeScrollToTop();
+    updateLastUpdated();
 });
 
 function initializeEventListeners() {
@@ -1314,6 +1317,9 @@ window.removeSelectedCourse = removeSelectedCourse;
 window.removeSelectedSection = removeSelectedSection;
 window.generateRoutine = generateRoutine;
 window.downloadRoutine = downloadRoutine;
+window.scrollToTop = scrollToTop;
+window.showHelp = showHelp;
+window.showAbout = showAbout;
 
 // Error handling
 window.addEventListener('error', function(e) {
@@ -1329,3 +1335,185 @@ document.addEventListener('dragover', function(e) {
 document.addEventListener('drop', function(e) {
     e.preventDefault();
 });
+
+// Footer functionality
+function initializeVisitCounter() {
+    // Get current visit count from localStorage
+    let visitCount = localStorage.getItem('examRoutineVisitCount');
+    if (!visitCount) {
+        visitCount = 0;
+    }
+    
+    // Increment visit count
+    visitCount = parseInt(visitCount) + 1;
+    
+    // Save updated count
+    localStorage.setItem('examRoutineVisitCount', visitCount);
+    
+    // Display count with animation
+    const visitCountElement = document.getElementById('visitCount');
+    if (visitCountElement) {
+        // Animate the counter
+        animateCounter(visitCountElement, 0, visitCount, 1000);
+    }
+}
+
+function animateCounter(element, start, end, duration) {
+    const startTime = performance.now();
+    const difference = end - start;
+    
+    function updateCounter(currentTime) {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        
+        // Easing function for smooth animation
+        const easeOutQuart = 1 - Math.pow(1 - progress, 4);
+        const currentCount = Math.floor(start + (difference * easeOutQuart));
+        
+        element.textContent = currentCount.toLocaleString();
+        
+        if (progress < 1) {
+            requestAnimationFrame(updateCounter);
+        } else {
+            element.textContent = end.toLocaleString();
+        }
+    }
+    
+    requestAnimationFrame(updateCounter);
+}
+
+function initializeScrollToTop() {
+    // Create scroll to top button
+    const scrollButton = document.createElement('button');
+    scrollButton.className = 'scroll-to-top';
+    scrollButton.innerHTML = '↑';
+    scrollButton.setAttribute('aria-label', 'Scroll to top');
+    scrollButton.onclick = scrollToTop;
+    document.body.appendChild(scrollButton);
+    
+    // Show/hide scroll button based on scroll position
+    window.addEventListener('scroll', function() {
+        if (window.pageYOffset > 300) {
+            scrollButton.classList.add('show');
+        } else {
+            scrollButton.classList.remove('show');
+        }
+    });
+}
+
+function scrollToTop() {
+    window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+    });
+}
+
+function updateLastUpdated() {
+    const lastUpdatedElement = document.getElementById('lastUpdated');
+    if (lastUpdatedElement) {
+        const now = new Date();
+        const options = { year: 'numeric', month: 'long' };
+        lastUpdatedElement.textContent = now.toLocaleDateString('en-US', options);
+    }
+}
+
+function showHelp() {
+    const helpMessage = `
+🔧 How to Use Exam Routine Generator:
+
+1. 📁 Upload Excel File
+   • Click "Browse Files" or drag & drop
+   • Supported: .xlsx, .xls files
+   • Required columns: Department, Course Code, Section, Date
+
+2. 🎯 Filter Your Data
+   • Select department (optional)
+   • Search courses by code/name/initials
+   • Choose specific sections
+
+3. 📅 Generate Routine
+   • Click "Generate My Routine"
+   • View sorted exam schedule
+   • Download as PNG image
+
+💡 Tips:
+• Use dark mode toggle (🌙) for better viewing
+• Search "cn" to find "Computer Networks"
+• Multiple sections can be selected
+• All data processed locally (secure)
+
+❓ Need more help? Check the GitHub repository for detailed documentation.
+    `;
+    
+    alert(helpMessage);
+}
+
+function showAbout() {
+    const aboutMessage = `
+📅 Exam Routine Generator v2.0
+
+🎯 Purpose:
+Create personalized exam schedules from Excel files with modern web technologies.
+
+✨ Key Features:
+• 📁 Universal Excel format support
+• 🌙 Dark/Light mode with persistence
+• 📱 Fully responsive design
+• 🔍 Smart search with autocomplete
+• 📷 High-quality image export
+• ⚡ Client-side processing (no server required)
+
+🛠️ Technology Stack:
+• HTML5, CSS3, JavaScript (ES6+)
+• SheetJS for Excel parsing
+• html2canvas for image generation
+• CSS Grid & Flexbox for layouts
+
+👨‍💻 Open Source:
+This project is open source and available on GitHub.
+Contributions and feedback are welcome!
+
+🚀 Deployment:
+• GitHub Pages ready
+• Works on any static hosting
+• No backend required
+
+Made with ❤️ for students and educators worldwide.
+    `;
+    
+    alert(aboutMessage);
+}
+
+// Add visit tracking for different actions
+function trackAction(actionName) {
+    const actionsKey = 'examRoutineActions';
+    let actions = JSON.parse(localStorage.getItem(actionsKey) || '{}');
+    
+    if (!actions[actionName]) {
+        actions[actionName] = 0;
+    }
+    actions[actionName]++;
+    
+    localStorage.setItem(actionsKey, JSON.stringify(actions));
+    
+    debugLog(`Action tracked: ${actionName} (${actions[actionName]} times)`);
+}
+
+// Enhanced event tracking
+const originalGenerateRoutine = generateRoutine;
+generateRoutine = function() {
+    trackAction('routine_generated');
+    return originalGenerateRoutine.apply(this, arguments);
+};
+
+const originalDownloadRoutine = downloadRoutine;
+downloadRoutine = function() {
+    trackAction('routine_downloaded');
+    return originalDownloadRoutine.apply(this, arguments);
+};
+
+const originalProcessFile = processFile;
+processFile = function() {
+    trackAction('file_uploaded');
+    return originalProcessFile.apply(this, arguments);
+};
