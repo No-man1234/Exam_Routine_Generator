@@ -524,10 +524,12 @@ function populateFilters() {
         deptSelect.appendChild(option);
     });
     
-    // Reset selections
+    // Reset selections and hide all dropdowns/autocompletes
     selectedCourses = [];
     selectedSections = [];
     courseSectionMap.clear(); // Clear the course-section mapping
+    sectionDropdown.style.display = 'none';
+    sectionAutocomplete.style.display = 'none';
     updateSelectedDisplay();
 }
 
@@ -583,6 +585,9 @@ function onCourseInput() {
     const query = courseInput.value.toLowerCase().trim();
     if (query.length === 0) {
         hideSuggestions();
+        // Hide section-related UI when course input is cleared
+        sectionDropdown.style.display = 'none';
+        sectionAutocomplete.style.display = 'none';
         return;
     }
     
@@ -748,12 +753,11 @@ function selectCourseForSectionSelection(courseCode) {
     courseInput.value = `${course.code} - ${course.title}`;
     hideSuggestions();
     
-    // Show sections for this course
+    // Show sections for this course (this will show the dropdown and hide autocomplete)
     showSectionsForCourse(courseCode);
     
-    // Show the section autocomplete for additional section selection
-    sectionAutocomplete.style.display = 'block';
-    sectionAutocomplete.classList.add('fade-in');
+    // Don't show section autocomplete here - the dropdown is the primary interface
+    // Section autocomplete is only for additional general section search
 }
 
 function showSectionsForCourse(courseCode) {
@@ -1070,6 +1074,10 @@ function generateRoutine() {
     
     // Generate table
     generateRoutineTable();
+    
+    // Hide any active course/section selection UI since routine is generated
+    sectionDropdown.style.display = 'none';
+    sectionAutocomplete.style.display = 'none';
     
     // Show routine section
     showRoutine();
