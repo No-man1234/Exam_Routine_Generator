@@ -1224,14 +1224,35 @@ function generateRoutineTable() {
 
 function downloadRoutine() {
     const routineContainer = document.getElementById('routineContainer');
+    const downloadBtn = document.getElementById('downloadBtn');
     
-    // Show loading
-    document.getElementById('downloadBtn').innerHTML = '⏳ Generating...';
-    document.getElementById('downloadBtn').disabled = true;
+    // Check if we're on mobile
+    const isMobile = window.innerWidth <= 768;
     
-    // Configure html2canvas options
+    // Show loading with different messages for mobile/desktop
+    downloadBtn.innerHTML = isMobile ? '⏳ Optimizing for mobile...' : '⏳ Generating...';
+    downloadBtn.disabled = true;
+    
+    if (isMobile) {
+        downloadMobileOptimized(routineContainer);
+    } else {
+        downloadDesktop(routineContainer);
+    }
+}
+
+function downloadDesktop(routineContainer) {
+    const downloadBtn = document.getElementById('downloadBtn');
+    
+    // Get current theme and background color
+    const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+    const backgroundColor = currentTheme === 'dark' ? '#1a1a1a' : '#ffffff';
+    
+    // Hide the download button before capture
+    downloadBtn.style.display = 'none';
+    
+    // Configure html2canvas options for desktop with theme-appropriate background
     const options = {
-        backgroundColor: '#ffffff',
+        backgroundColor: backgroundColor,
         scale: 2, // Higher quality
         useCORS: true,
         logging: false,
@@ -1240,29 +1261,212 @@ function downloadRoutine() {
     };
     
     html2canvas(routineContainer, options).then(canvas => {
-        // Create download link
-        const link = document.createElement('a');
-        link.download = `exam-routine-${new Date().toISOString().split('T')[0]}.png`;
-        link.href = canvas.toDataURL('image/png');
-        
-        // Trigger download
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        
-        // Reset button
-        document.getElementById('downloadBtn').innerHTML = '📷 Download as Image';
-        document.getElementById('downloadBtn').disabled = false;
-        
-        showSuccessMessage('Routine downloaded successfully!');
+        // Show the download button after capture
+        downloadBtn.style.display = 'block';
+        downloadCanvas(canvas);
     }).catch(error => {
-        console.error('Error generating image:', error);
-        alert('Error generating the image. Please try again.');
-        
-        // Reset button
-        document.getElementById('downloadBtn').innerHTML = '📷 Download as Image';
-        document.getElementById('downloadBtn').disabled = false;
+        // Show the download button after error
+        downloadBtn.style.display = 'block';
+        handleDownloadError(error);
     });
+}
+
+function downloadMobileOptimized(routineContainer) {
+    // Get current theme
+    const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+    const isDark = currentTheme === 'dark';
+    
+    // Define theme-specific colors
+    const themeColors = {
+        light: {
+            bgPrimary: '#ffffff',
+            bgSecondary: '#f8f9fa',
+            textPrimary: '#212529',
+            textSecondary: '#6c757d',
+            borderColor: '#dee2e6',
+            tableStripe: '#f8f9fa'
+        },
+        dark: {
+            bgPrimary: '#1a1a1a',
+            bgSecondary: '#2d2d2d',
+            textPrimary: '#ffffff',
+            textSecondary: '#b3b3b3',
+            borderColor: '#404040',
+            tableStripe: '#2d2d2d'
+        }
+    };
+    
+    const colors = themeColors[currentTheme];
+    
+    // Create a temporary container for mobile-optimized layout
+    const tempContainer = document.createElement('div');
+    tempContainer.style.cssText = `
+        position: fixed;
+        top: -9999px;
+        left: 0;
+        width: 800px;
+        padding: 20px;
+        background: ${colors.bgPrimary};
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        color: ${colors.textPrimary};
+        z-index: -1;
+    `;
+    
+    // Clone the routine content
+    const routineClone = routineContainer.cloneNode(true);
+    
+    // Apply mobile-optimized styles with theme support
+    const mobileStyles = `
+        <style>
+            .routine-container {
+                width: 100% !important;
+                max-width: none !important;
+                padding: 20px !important;
+                box-shadow: none !important;
+                border-radius: 0 !important;
+                background: ${colors.bgPrimary} !important;
+                color: ${colors.textPrimary} !important;
+            }
+            
+            .routine-header {
+                text-align: center;
+                margin-bottom: 20px;
+                padding-bottom: 15px;
+                border-bottom: 2px solid ${colors.borderColor};
+            }
+            
+            .routine-title {
+                font-size: 24px;
+                font-weight: 600;
+                color: ${colors.textPrimary};
+                margin-bottom: 8px;
+                line-height: 1.2;
+            }
+            
+            .routine-subtitle {
+                font-size: 14px;
+                color: ${colors.textSecondary};
+                font-style: italic;
+            }
+            
+            .table-container {
+                width: 100%;
+                overflow: visible !important;
+                margin-bottom: 20px;
+            }
+            
+            .routine-table {
+                width: 100% !important;
+                border-collapse: collapse;
+                background: ${colors.bgPrimary};
+                font-size: 12px;
+                border: 1px solid ${colors.borderColor};
+            }
+            
+            .routine-table th {
+                background: ${colors.bgSecondary} !important;
+                padding: 10px 6px !important;
+                text-align: left;
+                font-weight: 600;
+                color: ${colors.textPrimary} !important;
+                border: 1px solid ${colors.borderColor} !important;
+                font-size: 11px;
+                line-height: 1.2;
+            }
+            
+            .routine-table td {
+                padding: 8px 6px !important;
+                border: 1px solid ${colors.borderColor} !important;
+                color: ${colors.textPrimary} !important;
+                font-size: 11px;
+                line-height: 1.3;
+                word-wrap: break-word;
+                max-width: 80px;
+            }
+            
+            .routine-table tr:nth-child(even) {
+                background: ${colors.tableStripe} !important;
+            }
+            
+            .download-btn {
+                display: none !important;
+            }
+            
+            /* Ensure proper column widths */
+            .routine-table th:nth-child(1),
+            .routine-table td:nth-child(1) { width: 15%; } /* Date */
+            .routine-table th:nth-child(2),
+            .routine-table td:nth-child(2) { width: 12%; } /* Time */
+            .routine-table th:nth-child(3),
+            .routine-table td:nth-child(3) { width: 12%; } /* Course Code */
+            .routine-table th:nth-child(4),
+            .routine-table td:nth-child(4) { width: 25%; } /* Course Title */
+            .routine-table th:nth-child(5),
+            .routine-table td:nth-child(5) { width: 8%; }  /* Section */
+            .routine-table th:nth-child(6),
+            .routine-table td:nth-child(6) { width: 18%; } /* Teacher */
+            .routine-table th:nth-child(7),
+            .routine-table td:nth-child(7) { width: 10%; } /* Room */
+        </style>
+    `;
+    
+    // Add styles to the cloned content
+    tempContainer.innerHTML = mobileStyles + routineClone.outerHTML;
+    document.body.appendChild(tempContainer);
+    
+    // Wait for styles to apply
+    setTimeout(() => {
+        const optimizedContainer = tempContainer.querySelector('.routine-container');
+        
+        // Configure html2canvas options for mobile with theme-appropriate background
+        const options = {
+            backgroundColor: colors.bgPrimary,
+            scale: 2,
+            useCORS: true,
+            logging: false,
+            width: 800,
+            height: optimizedContainer.scrollHeight,
+            windowWidth: 800,
+            windowHeight: optimizedContainer.scrollHeight
+        };
+        
+        html2canvas(optimizedContainer, options).then(canvas => {
+            // Clean up
+            document.body.removeChild(tempContainer);
+            downloadCanvas(canvas);
+        }).catch(error => {
+            // Clean up on error
+            document.body.removeChild(tempContainer);
+            handleDownloadError(error);
+        });
+    }, 100);
+}
+
+function downloadCanvas(canvas) {
+    // Create download link
+    const link = document.createElement('a');
+    link.download = `exam-routine-${new Date().toISOString().split('T')[0]}.png`;
+    link.href = canvas.toDataURL('image/png');
+    
+    // Trigger download
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    // Reset button
+    document.getElementById('downloadBtn').innerHTML = '📷 Download as Image';
+    document.getElementById('downloadBtn').disabled = false;
+    
+    showSuccessMessage('Routine downloaded successfully!');
+}
+
+function handleDownloadError(error) {
+    console.error('Error generating image:', error);
+    alert('Error generating the image. Please try again.');
+    
+    // Reset button
+    document.getElementById('downloadBtn').innerHTML = '📷 Download as Image';
+    document.getElementById('downloadBtn').disabled = false;
 }
 
 // Utility functions

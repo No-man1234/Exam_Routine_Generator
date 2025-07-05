@@ -537,6 +537,8 @@ select:focus, input[type="text"]:focus {
 .table-container {
     overflow-x: auto;
     margin-bottom: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px var(--shadow);
 }
 
 .routine-table {
@@ -546,22 +548,26 @@ select:focus, input[type="text"]:focus {
     background: var(--bg-primary);
     border-radius: 8px;
     overflow: hidden;
-    box-shadow: 0 2px 8px var(--shadow);
+    min-width: 700px; /* Ensure minimum width for proper display */
 }
 
 .routine-table th {
     background: var(--bg-secondary);
-    padding: 12px;
+    padding: 12px 8px;
     text-align: left;
     font-weight: 600;
     color: var(--text-primary);
     border-bottom: 2px solid var(--border-color);
+    font-size: 0.9rem;
+    white-space: nowrap;
 }
 
 .routine-table td {
-    padding: 12px;
+    padding: 12px 8px;
     border-bottom: 1px solid var(--border-color);
     color: var(--text-primary);
+    font-size: 0.9rem;
+    word-wrap: break-word;
 }
 
 .routine-table tr:nth-child(even) {
@@ -570,6 +576,50 @@ select:focus, input[type="text"]:focus {
 
 .routine-table tr:hover {
     background: var(--bg-accent);
+}
+
+/* Responsive table columns */
+.routine-table th:nth-child(1),
+.routine-table td:nth-child(1) { 
+    width: 15%; 
+    min-width: 100px;
+}
+
+.routine-table th:nth-child(2),
+.routine-table td:nth-child(2) { 
+    width: 12%; 
+    min-width: 80px;
+}
+
+.routine-table th:nth-child(3),
+.routine-table td:nth-child(3) { 
+    width: 12%; 
+    min-width: 80px;
+}
+
+.routine-table th:nth-child(4),
+.routine-table td:nth-child(4) { 
+    width: 25%; 
+    min-width: 150px;
+}
+
+.routine-table th:nth-child(5),
+.routine-table td:nth-child(5) { 
+    width: 8%; 
+    min-width: 60px;
+    text-align: center;
+}
+
+.routine-table th:nth-child(6),
+.routine-table td:nth-child(6) { 
+    width: 18%; 
+    min-width: 120px;
+}
+
+.routine-table th:nth-child(7),
+.routine-table td:nth-child(7) { 
+    width: 10%; 
+    min-width: 80px;
 }
 
 /* Download Button */
@@ -673,13 +723,77 @@ select:focus, input[type="text"]:focus {
         display: inline-block;
     }
     
+    /* Mobile table improvements */
+    .table-container {
+        margin: 0 -15px 2rem;
+        border-radius: 0;
+        box-shadow: none;
+        border-top: 1px solid var(--border-color);
+        border-bottom: 1px solid var(--border-color);
+    }
+    
     .routine-table {
-        font-size: 0.9rem;
+        border-radius: 0;
+        font-size: 0.8rem;
+        min-width: 600px;
     }
     
     .routine-table th,
     .routine-table td {
-        padding: 8px;
+        padding: 8px 4px;
+        font-size: 0.75rem;
+    }
+    
+    .routine-table th {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        background: var(--bg-secondary) !important;
+    }
+    
+    /* Adjust column widths for mobile */
+    .routine-table th:nth-child(1),
+    .routine-table td:nth-child(1) { 
+        min-width: 90px;
+        font-size: 0.7rem;
+    }
+    
+    .routine-table th:nth-child(2),
+    .routine-table td:nth-child(2) { 
+        min-width: 70px;
+        font-size: 0.7rem;
+    }
+    
+    .routine-table th:nth-child(3),
+    .routine-table td:nth-child(3) { 
+        min-width: 70px;
+        font-weight: 600;
+    }
+    
+    .routine-table th:nth-child(4),
+    .routine-table td:nth-child(4) { 
+        min-width: 120px;
+        font-size: 0.7rem;
+    }
+    
+    .routine-table th:nth-child(5),
+    .routine-table td:nth-child(5) { 
+        min-width: 50px;
+        text-align: center;
+        font-weight: 600;
+        color: var(--primary);
+    }
+    
+    .routine-table th:nth-child(6),
+    .routine-table td:nth-child(6) { 
+        min-width: 100px;
+        font-size: 0.7rem;
+    }
+    
+    .routine-table th:nth-child(7),
+    .routine-table td:nth-child(7) { 
+        min-width: 60px;
+        font-size: 0.7rem;
     }
     
     .section-dropdown {
@@ -714,6 +828,13 @@ select:focus, input[type="text"]:focus {
         right: 1rem;
         width: 45px;
         height: 45px;
+        font-size: 1rem;
+    }
+    
+    /* Download button mobile improvement */
+    .download-btn {
+        margin-top: 1rem;
+        padding: 16px 20px;
         font-size: 1rem;
     }
 }
