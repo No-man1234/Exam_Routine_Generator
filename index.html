@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Generate personalized exam routines from Excel files. Upload your exam schedule, filter by courses and sections, and download as image.">
+    <meta name="keywords" content="exam routine, schedule generator, excel parser, student tools, academic planner">
+    <meta name="author" content="Exam Routine Generator">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Exam Routine Generator">
+    <meta property="og:description" content="Generate personalized exam routines from Excel files with smart filtering and dark mode support.">
+    <meta property="og:url" content="https://yourusername.github.io/exam-routine-generator">
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary">
+    <meta property="twitter:title" content="Exam Routine Generator">
+    <meta property="twitter:description" content="Generate personalized exam routines from Excel files with smart filtering and dark mode support.">
+    
+    <title>Exam Routine Generator - Create Your Personal Exam Schedule</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">
+                🌙
+            </button>
+            <h1>Exam Routine Generator</h1>
+            <p>Upload your Excel file and generate a personalized exam routine</p>
+            <div class="current-date" id="currentDate"></div>
+        </div>
+
+        <!-- Upload Section -->
+        <div class="upload-section">
+            <div class="upload-area" id="uploadArea">
+                <div class="upload-icon">📁</div>
+                <h3>Upload Excel File</h3>
+                <p>Drag and drop your exam schedule Excel file here or click to browse</p>
+                <input type="file" id="fileInput" class="file-input" accept=".xlsx,.xls">
+                <button class="browse-btn" type="button">
+                    Browse Files
+                </button>
+            </div>
+        </div>
+
+        <!-- Loading -->
+        <div class="loading" id="loading">
+            Processing your file...
+        </div>
+
+        <!-- Filters Section -->
+        <div class="filters-section" id="filtersSection">
+            <div class="filters-grid">
+                <div class="filter-group">
+                    <h3>Department</h3>
+                    <div class="form-group">
+                        <label for="deptSelect">Select Department:</label>
+                        <select id="deptSelect">
+                            <option value="">All Departments</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="filter-group">
+                    <h3>Courses</h3>
+                    <div class="form-group">
+                        <label for="courseInput">Search Courses:</label>
+                        <div class="autocomplete-container">
+                            <input type="text" id="courseInput" placeholder="Type course code or name..." autocomplete="off">
+                            <div class="suggestions" id="courseSuggestions"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Section Selection for Course -->
+                    <div class="section-dropdown" id="sectionDropdown">
+                        <label for="availableSections">Select Sections:</label>
+                        <select id="availableSections" multiple size="4">
+                        </select>
+                        <button type="button" class="add-sections-btn" onclick="addSelectedSections()">
+                            ➕ Add Selected Sections
+                        </button>
+                    </div>
+                    
+                    <div class="selected-items" id="selectedCourses">
+                        <div class="selected-label">Selected Courses & Sections:</div>
+                    </div>
+                </div>
+                
+                <div class="filter-group" id="sectionAutocomplete">
+                    <h3>Sections</h3>
+                    <div class="form-group">
+                        <label for="sectionInput">Search Sections:</label>
+                        <div class="autocomplete-container">
+                            <input type="text" id="sectionInput" placeholder="Type section..." autocomplete="off">
+                            <div class="suggestions" id="sectionSuggestions"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="selected-items" id="selectedSections">
+                        <div class="selected-label">All Selected Sections:</div>
+                    </div>
+                </div>
+            </div>
+            
+            <button class="generate-btn" onclick="generateRoutine()">
+                Generate My Routine
+            </button>
+        </div>
+
+        <!-- Routine Section -->
+        <div class="routine-section" id="routineSection">
+            <div class="routine-container" id="routineContainer">
+                <div class="routine-header">
+                    <h2 class="routine-title" id="routineTitle">Your Exam Routine</h2>
+                    <p class="routine-subtitle">Generated on <span id="currentDate"></span></p>
+                </div>
+                
+                <div class="table-container">
+                    <table class="routine-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Time</th>
+                                <th>Course Code</th>
+                                <th>Course Title</th>
+                                <th>Section</th>
+                                <th>Teacher</th>
+                                <th>Room</th>
+                            </tr>
+                        </thead>
+                        <tbody id="routineBody">
+                        </tbody>
+                    </table>
+                </div>
+                
+                <button class="download-btn" id="downloadBtn" onclick="downloadRoutine()">
+                    📷 Download as Image
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
