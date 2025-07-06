@@ -39,7 +39,6 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeEventListeners();
     setCurrentDate();
     initializeTheme();
-    initializeVisitCounter();
     initializeScrollToTop();
     updateLastUpdated();
 });
@@ -1547,62 +1546,6 @@ document.addEventListener('dragover', function(e) {
 document.addEventListener('drop', function(e) {
     e.preventDefault();
 });
-
-// Footer functionality
-function initializeVisitCounter() {
-    const visitCountElement = document.getElementById('visitCount');
-    if (!visitCountElement) return;
-    
-    // Show loading state
-    visitCountElement.textContent = 'Loading...';
-    
-    // Use CountAPI.xyz for global visit tracking
-    const counterUrl = 'https://api.countapi.xyz/hit/exam-routine-generator.github.io/visits';
-    
-    // Fetch global visit count
-    fetch(counterUrl)
-        .then(response => response.json())
-        .then(data => {
-            if (data && data.value) {
-                // Animate counter from 0 to actual value
-                animateCounter(visitCountElement, 0, data.value, 1500);
-            } else {
-                visitCountElement.textContent = 'Error loading';
-            }
-        })
-        .catch(error => {
-            console.warn('Visit counter error:', error);
-            // Fallback to localStorage counter with indicator
-            let localCount = localStorage.getItem('examRoutineVisitCount') || 0;
-            localCount = parseInt(localCount) + 1;
-            localStorage.setItem('examRoutineVisitCount', localCount);
-            visitCountElement.textContent = `${localCount} (local)`;
-        });
-}
-
-function animateCounter(element, start, end, duration) {
-    const startTime = performance.now();
-    const difference = end - start;
-    
-    function updateCounter(currentTime) {
-        const elapsed = currentTime - startTime;
-        const progress = Math.min(elapsed / duration, 1);
-        
-        // Easing function for smooth animation
-        const easeOutQuart = 1 - Math.pow(1 - progress, 4);
-        const currentCount = Math.floor(start + (difference * easeOutQuart));
-        
-        element.textContent = currentCount.toLocaleString();
-        
-        if (progress < 1) {
-            requestAnimationFrame(updateCounter);
-        } else {
-            element.textContent = end.toLocaleString();
-        }
-    }
-    
-    requestAnimationFrame(updateCounter);
-}
 
 function initializeScrollToTop() {
     // Create scroll to top button
