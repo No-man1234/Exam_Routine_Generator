@@ -790,54 +790,54 @@ function showSectionsForCourse(courseCode) {
         });
     }
     
+    // Clear any previous selection
+    availableSectionsSelect.selectedIndex = -1;
+    
     // Show the section dropdown and hide autocomplete
     sectionDropdown.style.display = 'block';
     sectionAutocomplete.style.display = 'none';
 }
 
 function addSelectedSections() {
-    const selectedOptions = Array.from(availableSectionsSelect.selectedOptions);
-    if (selectedOptions.length === 0) {
-        alert('Please select at least one section.');
+    const selectedOption = availableSectionsSelect.options[availableSectionsSelect.selectedIndex];
+    if (!selectedOption || !selectedOption.value) {
+        alert('Please select a section.');
         return;
     }
-    
+
     // Get the course from the input
     const courseText = courseInput.value;
     const courseCode = courseText.split(' - ')[0];
     const course = availableCourses.find(c => c.code === courseCode);
-    
+
     if (!course) return;
-    
+
     // Add course to selected courses if not already there
     if (!selectedCourses.some(selected => selected.code === courseCode)) {
         selectedCourses.push(course);
     }
-    
+
     // Track course-section relationships
-    selectedOptions.forEach(option => {
-        const section = option.value;
-        if (!selectedSections.includes(section)) {
-            selectedSections.push(section);
-        }
-        
-        // Store which course this section was selected for
-        if (!courseSectionMap.has(courseCode)) {
-            courseSectionMap.set(courseCode, []);
-        }
-        if (!courseSectionMap.get(courseCode).includes(section)) {
-            courseSectionMap.get(courseCode).push(section);
-        }
-    });
-    
-    // Reset the interface
-    courseInput.value = '';
-    sectionDropdown.style.display = 'none';
-    sectionAutocomplete.style.display = 'none'; // Hide section autocomplete after adding sections
-    
-    // Update display
-    updateSelectedDisplay();
-    updateAvailableSections();
+    const section = selectedOption.value;
+    if (!selectedSections.includes(section)) {
+        selectedSections.push(section);
+    }
+
+    // Store which course this section was selected for
+    courseSectionMap.set(courseCode, [section]); // Only one section per course
+
+    // Animate fade-out for dropdown
+    sectionDropdown.classList.add('fade-out');
+    setTimeout(() => {
+        sectionDropdown.style.display = 'none';
+        sectionDropdown.classList.remove('fade-out');
+        // Reset the interface
+        courseInput.value = '';
+        sectionAutocomplete.style.display = 'none'; // Hide section autocomplete after adding sections
+        // Update display with fade-in
+        updateSelectedDisplay(true);
+        updateAvailableSections();
+    }, 300);
 }
 
 function showSectionSuggestions(sections) {
@@ -926,12 +926,11 @@ function removeSelectedSection(section) {
     updateSelectedDisplay();
 }
 
-function updateSelectedDisplay() {
+function updateSelectedDisplay(fadeIn) {
     // Update selected courses display with their sections
     const coursesHtml = selectedCourses.map(course => {
         const courseSections = courseSectionMap.get(course.code) || [];
         const sectionsText = courseSections.length > 0 ? ` (Sections: ${courseSections.join(', ')})` : '';
-        
         return `
             <div class="selected-item">
                 <span>${course.code} - ${course.title}${sectionsText}</span>
@@ -939,12 +938,15 @@ function updateSelectedDisplay() {
             </div>
         `;
     }).join('');
-    
     selectedCoursesContainer.innerHTML = `
         <div class="selected-label">Selected Courses & Sections:</div>
         ${coursesHtml}
     `;
-    
+    // Fade-in animation
+    if (fadeIn) {
+        selectedCoursesContainer.classList.add('fade-in');
+        setTimeout(() => selectedCoursesContainer.classList.remove('fade-in'), 400);
+    }
     // Update selected sections display (simplified)
     const sectionsHtml = selectedSections.map(section => `
         <div class="selected-item">
@@ -952,7 +954,6 @@ function updateSelectedDisplay() {
             <button class="remove-btn" onclick="removeSelectedSection('${section}')">×</button>
         </div>
     `).join('');
-    
     selectedSectionsContainer.innerHTML = `
         <div class="selected-label">All Selected Sections:</div>
         ${sectionsHtml}

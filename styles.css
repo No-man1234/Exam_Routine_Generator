@@ -310,7 +310,7 @@ select:focus, input[type="text"]:focus {
     margin-top: 2px;
 }
 
-/* Section Dropdown */
+/* Section Dropdown - match department select */
 .section-dropdown {
     display: none;
     margin-top: 1rem;
@@ -344,15 +344,15 @@ select:focus, input[type="text"]:focus {
 .section-dropdown select {
     width: 100%;
     margin-bottom: 1.2rem;
-    min-height: 120px;
-    padding: 12px;
+    padding: 8px;
     border: 1px solid var(--border-color);
     border-radius: 8px;
     background: var(--bg-primary);
     color: var(--text-primary);
     font-size: 1rem;
     font-family: inherit;
-    transition: all 0.3s ease;
+    transition: border-color 0.3s, box-shadow 0.3s;
+    min-height: unset;
 }
 
 .section-dropdown select:focus {
@@ -677,6 +677,22 @@ select:focus, input[type="text"]:focus {
     }
 }
 
+/* Fade-out for dropdown */
+.fade-out {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+/* Fade-in for selected-items */
+.fade-in {
+    opacity: 0;
+    animation: fadeInSelected 0.4s forwards;
+}
+@keyframes fadeInSelected {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .container {
@@ -801,7 +817,9 @@ select:focus, input[type="text"]:focus {
     }
     
     .section-dropdown select {
-        min-height: 100px;
+        min-height: unset;
+        padding: 8px;
+        font-size: 1rem;
     }
     
     /* Footer responsive */
@@ -876,7 +894,9 @@ select:focus, input[type="text"]:focus {
     }
     
     .section-dropdown select {
-        min-height: 80px;
+        min-height: unset;
+        padding: 8px;
+        font-size: 1rem;
     }
     
     /* Footer mobile adjustments */
